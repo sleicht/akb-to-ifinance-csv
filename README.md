@@ -1,4 +1,4 @@
-rabo-to-ifinance-csv
+akb-to-ifinance-csv (WIP)
 ====================
 
-Converter to convert the Rabobank CSV to a more IFinance friendly format.
+Converter to convert the AKB (Aargauer Kantonalbank) CSV to a more iFinance friendly format.
