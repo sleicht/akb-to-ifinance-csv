@@ -9,15 +9,19 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
+import java.io.StringReader
 
 class App : CliktCommand(help = "Convert <input> AKB CSV to <output> iFinance CSV.") {
 	val verbose: Boolean by option("-v", "--verbose").boolean().default(false).help("Be more verbose")
 	val input: File by argument("<input>").file(mustExist = true).help("Input file")
-	val filter: File by argument("<filters>").file(mustExist = true).help("Filter file")
 	val output: File by argument("<output>").file().help("Output file")
 
+	val filterInput = """
+			Warenbezug und Dienstleistungen ; AKB Debit;
+			TWINT-Zahlung ;,;""".trimIndent()
+	val akbFilter = StringReader(filterInput)
 	override fun run() {
-		CsvRecordConverter(input.reader(), filter.reader(), output.writer(), verbose).convert()
+		CsvRecordConverter(input.reader(), akbFilter, output.writer(), verbose).convert()
 	}
 }
 

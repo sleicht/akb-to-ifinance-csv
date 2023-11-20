@@ -21,8 +21,8 @@ object AkbRecordUtil {
 
 	fun fromCsvRecord(data: List<String>, filter: List<Pair<Regex, String>>): AkbRecord? {
 		return try {
-			val debit = data.getOrNull(3);
-			val credit = data.getOrNull(4);
+			val debit = data.getOrNull(3)
+			val credit = data.getOrNull(4)
 			val entry = AkbRecord(
 				transactionDate = LocalDate.parse(data[0], DateTimeFormatter.ofPattern("dd.MM.yyyy")),
 				interestDate = LocalDate.parse(data[1], DateTimeFormatter.ofPattern("dd.MM.yyyy")),

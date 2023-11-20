@@ -36,6 +36,7 @@ class CsvRecordConverterTest {
 	@Test
 	fun `output multiple records correctly`() {
 		val input = """
+			|Buchung;Valuta;Buchungstext;Belastung;Gutschrift;Saldo CHF;
 			|20.11.2023;19.11.2023;TWINT-Zahlung FIRMA AG, ZURICH +41781231212 19.11.2023 12:11;22.90;;1'222.00;
 			|20.11.2023;19.11.2023;TWINT-Zahlung DARPA AG, ZURICH +41781231212 19.11.2023 12:11;;22.90;1'222.00;
 			|17.11.2023;15.11.2023;Warenbezug und Dienstleistungen FIRMA AG AKB Debit Mastercard Kartennummer 1234 4321 0987 7890 15.11.2023 08:21;4.00;;1'000.01;
