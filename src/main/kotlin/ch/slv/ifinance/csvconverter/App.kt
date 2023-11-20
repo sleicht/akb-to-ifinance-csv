@@ -13,10 +13,11 @@ import java.io.File
 class App : CliktCommand(help = "Convert <input> AKB CSV to <output> iFinance CSV.") {
 	val verbose: Boolean by option("-v", "--verbose").boolean().default(false).help("Be more verbose")
 	val input: File by argument("<input>").file(mustExist = true).help("Input file")
+	val filter: File by argument("<filters>").file(mustExist = true).help("Filter file")
 	val output: File by argument("<output>").file().help("Output file")
 
 	override fun run() {
-		CsvRecordConverter(input.reader(), output.writer(), verbose).convert()
+		CsvRecordConverter(input.reader(), filter.reader(), output.writer(), verbose).convert()
 	}
 }
 
