@@ -2,7 +2,7 @@ package ch.slv.ifinance.csvconverter
 
 import java.math.BigDecimal
 
-data class IFinanceRecord (
+data class IFinanceRecord(
 	val date: String,
 	val amount: BigDecimal,
 	val beneficiary: String,
