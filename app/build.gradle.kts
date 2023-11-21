@@ -1,11 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
-import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
-
 plugins {
-	id("org.jetbrains.kotlin.jvm") version "1.9.20"
+	id("org.jetbrains.kotlin.jvm")
 	application
-	id("io.github.goooler.shadow") version "8.1.2"
+	id("io.github.goooler.shadow")
 }
 
 group = "ch.slv.ifinance"
@@ -17,12 +15,12 @@ repositories {
 	mavenCentral()
 }
 
-val kotlinVersion = (plugins.getPlugin("org.jetbrains.kotlin.jvm") as KotlinBasePlugin).pluginVersion
+val kotlinVersion = "1.9.20"
 dependencies {
-	implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-	implementation("com.github.ajalt.clikt:clikt:4.2.1")
-	implementation("net.sf.supercsv:super-csv:2.4.0")
-	implementation("ch.qos.logback:logback-classic:1.4.11")
+	implementation(Kotlin.stdlib)
+	implementation("com.github.ajalt.clikt:clikt:_")
+	implementation("net.sf.supercsv:super-csv:_")
+	implementation("ch.qos.logback:logback-classic:_")
 }
 
 testing {
