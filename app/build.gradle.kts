@@ -1,9 +1,11 @@
-plugins {
-	// Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-	id("org.jetbrains.kotlin.jvm") version "1.9.20"
+@file:Suppress("UnstableApiUsage")
 
-	// Apply the application plugin to add support for building a CLI application in Java.
+import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
+
+plugins {
+	id("org.jetbrains.kotlin.jvm") version "1.9.20"
 	application
+	id("io.github.goooler.shadow") version "8.1.2"
 }
 
 group = "ch.slv.ifinance"
@@ -15,20 +17,17 @@ repositories {
 	mavenCentral()
 }
 
-val kotlinVersion = "1.9.20"
+val kotlinVersion = (plugins.getPlugin("org.jetbrains.kotlin.jvm") as KotlinBasePlugin).pluginVersion
 dependencies {
-
-	implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-	implementation("com.github.ajalt.clikt:clikt-jvm:4.2.1")
+	implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	implementation("com.github.ajalt.clikt:clikt:4.2.1")
 	implementation("net.sf.supercsv:super-csv:2.4.0")
 	implementation("ch.qos.logback:logback-classic:1.4.11")
 }
 
 testing {
 	suites {
-		// Configure the built-in test suite
 		val test by getting(JvmTestSuite::class) {
-			// Use Kotlin Test test framework
 			useKotlinTest(kotlinVersion)
 		}
 	}
@@ -40,23 +39,7 @@ java {
 	}
 }
 
+application.applicationName = "akbToIFinance"
 application {
-	mainClass.set("ch.slv.ifinance.csvconverter.AppKt")
+	mainClass.set("ch.slv.ifinance.csvconverter.AkbToIFinanceKt")
 }
-
-//tasks.test {
-//	useJUnitPlatform()
-//}
-//
-//tasks.withType<KotlinCompile> {
-//	kotlinOptions {
-//		jvmTarget = "21"
-//		freeCompilerArgs = listOf("-Xjvm-default=all")
-//	}
-//}
-//
-//tasks.jar {
-//	manifest {
-//		attributes["Main-Class"] = "your.main.Class"
-//	}
-//}

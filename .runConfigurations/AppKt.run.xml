@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-	<configuration default="false" name="AppKt" type="JetRunConfigurationType" nameIsGenerated="true">
-		<option name="MAIN_CLASS_NAME" value="ch.slv.ifinance.csvconverter.AppKt"/>
+	<configuration default="false" name="AkbToIFinanceKt" type="JetRunConfigurationType" nameIsGenerated="true">
+		<option name="MAIN_CLASS_NAME" value="ch.slv.ifinance.csvconverter.AkbToIFinanceKt"/>
 		<module name="akb-csv-converter.app.main"/>
 		<option name="PROGRAM_PARAMETERS" value="tmp/Kontoauszug.csv tmp/ifinance.csv "/>
 		<shortenClasspath name="NONE"/>

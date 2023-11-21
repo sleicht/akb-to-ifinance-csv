@@ -11,7 +11,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 import java.io.StringReader
 
-class App : CliktCommand(help = "Convert <input> AKB CSV to <output> iFinance CSV.") {
+class AkbToIFinance : CliktCommand(help = "Convert <input> AKB CSV to <output> iFinance CSV.") {
 	val verbose: Boolean by option("-v", "--verbose").boolean().default(false).help("Be more verbose")
 	val input: File by argument("<input>").file(mustExist = true).help("Input file")
 	val output: File by argument("<output>").file().help("Output file")
@@ -25,4 +25,4 @@ class App : CliktCommand(help = "Convert <input> AKB CSV to <output> iFinance CS
 	}
 }
 
-fun main(args: Array<String>) = App().main(args)
+fun main(args: Array<String>) = AkbToIFinance().main(args)
