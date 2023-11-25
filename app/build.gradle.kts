@@ -15,12 +15,13 @@ repositories {
 	mavenCentral()
 }
 
-val kotlinVersion = "1.9.20"
+val kotlinVersion = "1.9.21"
 dependencies {
 	implementation(Kotlin.stdlib)
 	implementation("com.github.ajalt.clikt:clikt:_")
 	implementation("net.sf.supercsv:super-csv:_")
 	implementation("ch.qos.logback:logback-classic:_")
+	testImplementation("net.datafaker:datafaker:_")
 }
 
 testing {
