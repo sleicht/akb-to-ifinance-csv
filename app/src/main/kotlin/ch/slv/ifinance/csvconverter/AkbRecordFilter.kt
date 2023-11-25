@@ -1,16 +1,29 @@
 package ch.slv.ifinance.csvconverter
 
+import org.slf4j.LoggerFactory
 import kotlin.jvm.optionals.getOrNull
 
+data class AkbRecordFilter(
+	val beneficiaryRegex: Regex,
+	val descriptionRegex: Regex,
+)
+
+data class AkbRecordFiltereData(
+	val beneficiary: String?,
+	val description: String?,
+)
+
 object AkbRecordFilterUtil {
-	fun filter(string: String?, filter: List<Pair<Regex, String>>): String? {
+	private val log = LoggerFactory.getLogger(javaClass)
+	fun filter(string: String?, filter: List<AkbRecordFilter>): AkbRecordFiltereData? {
 		return string?.let {
 			filter.stream()
-				.filter { it.first.containsMatchIn(string) }
+				.filter { it.beneficiaryRegex.containsMatchIn(string) }
 				.map {
-					val filtered = it.first.split(string).last()
-					val searchIndex = filtered.indexOf(it.second)
-					filtered.substring(0, searchIndex)
+					val (beneficiary) = it.beneficiaryRegex.find(string)!!.destructured
+					val (description) = it.descriptionRegex.find(string)!!.destructured
+
+					AkbRecordFiltereData(beneficiary, description)
 				}
 				.findFirst().getOrNull()
 		}

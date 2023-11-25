@@ -6,20 +6,31 @@ import org.supercsv.io.CsvListWriter
 import org.supercsv.prefs.CsvPreference
 import org.supercsv.prefs.CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE
 import java.io.Reader
+import java.io.StringReader
 import java.io.Writer
 import java.math.BigDecimal
 import java.time.format.DateTimeFormatter
 
 class CsvRecordConverter(
 	private val akbReader: Reader,
-	private val filterReader: Reader,
+	private var filterReader: Reader?,
 	private val iFinanceWriter: Writer,
 	private val verbose: Boolean
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private val writerCsvPreferences = CsvPreference.Builder('"', ','.code, System.lineSeparator()).build()
+	private val filterInput = """
+			Warenbezug und Dienstleistungen ([\w ]+) AKB Debit; AKB Debit;
+			TWINT-Zahlung ([\w ]+);(TWINT-Zahlung [\w ]+);;
+			" Zahlungseingang \/ Ref\.-Nr\. \d+ ([\w ]+) Referenz:"; Referenz: ;
+			" Belastung e-banking / Ref.-Nr. \d+ ([\w ]+) Mitteilung: "; Mitteilung: ;
+			""".trimIndent()
 
 	fun convert() {
+		if (filterReader == null) {
+			filterReader = StringReader(filterInput)
+		}
+
 		log.debug("Starting conversion.")
 		val akbCsvReader = CsvListReader(akbReader, EXCEL_NORTH_EUROPE_PREFERENCE)
 		val filterCsvReader = CsvListReader(filterReader, EXCEL_NORTH_EUROPE_PREFERENCE)
@@ -41,11 +52,11 @@ class CsvRecordConverter(
 		return generateSequence { readLine() }.toList()
 	}
 
-	private fun readCsvToPair(csvReader: CsvListReader): List<Pair<Regex, String>> {
+	private fun readCsvToPair(csvReader: CsvListReader): List<AkbRecordFilter> {
 		fun readLine(): List<String>? = csvReader.read()?.toList()
 		return generateSequence {
 			val line = readLine()
-			line?.let { Pair(it[0].toRegex(), it[1]) }
+			line?.let { AkbRecordFilter(it[0].toRegex(), it[1].toRegex()) }
 		}.toList()
 	}
 
@@ -72,8 +83,8 @@ class CsvRecordConverter(
 			date = akbRecord.interestDate.format(DateTimeFormatter.BASIC_ISO_DATE),
 			amount = signedAmount,
 			beneficiary = akbRecord.beneficiary.orEmpty(),
-			title = "",//akbRecord.targetTitle,
-			description = akbRecord.description.orEmpty().trim()
+			title = akbRecord.description.orEmpty().trim(),
+			description = akbRecord.comment.orEmpty().trim()
 		)
 	}
 }
