@@ -12,7 +12,7 @@ class CsvRecordConverterTest {
 	@Test
 	fun `output an empty file if the input is empty`() {
 		val reader = StringReader("")
-		val filter = StringReader("TWINT-Zahlung ;,")
+		val filter = StringReader("TWINT-Zahlung ([\\w ]+);(TWINT-Zahlung [\\w ]+);")
 		val writer = StringWriter()
 		CsvRecordConverter(reader, filter, writer, false).convert()
 		assertEquals("", writer.toString().trim())
@@ -21,7 +21,7 @@ class CsvRecordConverterTest {
 	@Test
 	fun `give empty output if the records are unparsable`() {
 		val reader = StringReader("some,bogus,input")
-		val filter = StringReader("TWINT-Zahlung ;,")
+		val filter = StringReader("TWINT-Zahlung ([\\w ]+);(TWINT-Zahlung [\\w ]+);")
 		val writer = StringWriter()
 		CsvRecordConverter(reader, filter, writer, false).convert()
 		assertEquals("", writer.toString().trim())
@@ -30,7 +30,7 @@ class CsvRecordConverterTest {
 	@Test
 	fun `give correctly escape any quotes in the CSV output`() {
 		val reader = StringReader("20.11.2023;19.11.2023;some<,weird \"\"\"quote\"\"\";22.90;;1'222.00;")
-		val filter = StringReader("TWINT-Zahlung ;,")
+		val filter = StringReader("TWINT-Zahlung ([\\w ]+);(TWINT-Zahlung [\\w ]+);")
 		val writer = StringWriter()
 		CsvRecordConverter(reader, filter, writer, false).convert()
 		assertEquals("20231119,-22.90,,,\"some<,weird \"\"quote\"\"\"", writer.toString().trim())
@@ -52,9 +52,9 @@ class CsvRecordConverterTest {
 		assertEquals(
 			"""
 			|
-				|20231119,-22.90,FIRMA AG,,"TWINT-Zahlung FIRMA AG, ZURICH +41781231212 19.11.2023 12:11"
-				|20231119,22.90,DARPA AG,,"TWINT-Zahlung DARPA AG, ZURICH +41781231212 19.11.2023 12:11"
-				|20231115,-4.00,FIRMA AG,,Warenbezug und Dienstleistungen FIRMA AG AKB Debit Mastercard Kartennummer 1234 4321 0987 7890 15.11.2023 08:21
+				|20231119,-22.90,FIRMA AG,TWINT-Zahlung FIRMA AG,"TWINT-Zahlung FIRMA AG, ZURICH +41781231212 19.11.2023 12:11"
+				|20231119,22.90,DARPA AG,TWINT-Zahlung DARPA AG,"TWINT-Zahlung DARPA AG, ZURICH +41781231212 19.11.2023 12:11"
+				|20231115,-4.00,FIRMA AG,Warenbezug und Dienstleistungen FIRMA AG,Warenbezug und Dienstleistungen FIRMA AG AKB Debit Mastercard Kartennummer 1234 4321 0987 7890 15.11.2023 08:21
                 |""".trimMargin().trim(), writer.toString().trim()
 		)
 	}
@@ -62,7 +62,6 @@ class CsvRecordConverterTest {
 	@Test
 	fun `output multiple ingoing and ebanking records correctly`() {
 		val faker = Faker(Locale.of("de", "CH"))
-
 		val creditor1 = "${faker.company().name()} ${faker.address().fullAddress()}"
 		val creditor2 = "${faker.company().name()} ${faker.address().fullAddress()}"
 		val debitor = "${faker.name().name()} ${faker.address().fullAddress()}".uppercase()
@@ -87,14 +86,39 @@ class CsvRecordConverterTest {
 	}
 
 	@Test
+	fun `output multiple transfers correctly`() {
+		val faker = Faker(Locale.of("de", "CH"))
+		val account = faker.finance().iban("CH")
+		val debitor = "${faker.name().name()} ${faker.address().fullAddress()}"
+		val input = """
+			|Buchung;Valuta;Buchungstext;Belastung;Gutschrift;Saldo CHF;
+			|01.11.2023;01.11.2023;" Übertrag von $account $debitor / Ref.-Nr. 1234567890 FALSCHBUCHUNG KK ";;2'000.00;5'000.06;
+			|22.11.2023;22.11.2023;" Übertrag von $account $debitor / Ref.-Nr. 1234567890 ";;500.00;900.46;
+            |"unparseable"
+            |
+            |above is empty""".trimMargin()
+		val reader = StringReader(input)
+		val writer = StringWriter()
+		CsvRecordConverter(reader, null, writer, false).convert()
+		assertEquals(
+			"""
+			|
+				|20231101,2000.00,$account,FALSCHBUCHUNG KK,"Übertrag von $account $debitor / Ref.-Nr. 1234567890 FALSCHBUCHUNG KK"
+				|20231122,500.00,$account,,"Übertrag von $account $debitor / Ref.-Nr. 1234567890"
+                |""".trimMargin().trim(), writer.toString().trim()
+		)
+	}
+
+	@Test
 	fun `give a correct CSV of generic card payment if the input is parseable`() {
 		val reader =
 			StringReader("17.11.2023;15.11.2023;Warenbezug und Dienstleistungen FIRMA AG AKB Debit Mastercard Kartennummer 1234 4321 0987 7890 15.11.2023 08:21;4.00;;1'000.01;")
-		val filter = StringReader("Warenbezug und Dienstleistungen ; AKB Debit")
+		val filter =
+			StringReader("Warenbezug und Dienstleistungen ([\\w ]+) AKB Debit;(Warenbezug und Dienstleistungen [\\w ]+) AKB Debit;")
 		val writer = StringWriter()
 		CsvRecordConverter(reader, filter, writer, false).convert()
 		assertEquals(
-			"20231115,-4.00,FIRMA AG,,Warenbezug und Dienstleistungen FIRMA AG AKB Debit Mastercard Kartennummer 1234 4321 0987 7890 15.11.2023 08:21",
+			"20231115,-4.00,FIRMA AG,Warenbezug und Dienstleistungen FIRMA AG,Warenbezug und Dienstleistungen FIRMA AG AKB Debit Mastercard Kartennummer 1234 4321 0987 7890 15.11.2023 08:21",
 			writer.toString().trim()
 		)
 	}
@@ -115,7 +139,7 @@ class CsvRecordConverterTest {
 	@Test
 	fun `not output any quotes when outputting the empty string`() {
 		val reader = StringReader("20.11.2023;19.11.2023;;22.90;;1'222.00;")
-		val filter = StringReader("TWINT-Zahlung ;,")
+		val filter = StringReader("TWINT-Zahlung ([\\w ]+);(TWINT-Zahlung [\\w ]+);")
 		val writer = StringWriter()
 		CsvRecordConverter(reader, filter, writer, false).convert()
 		assertEquals("20231119,-22.90,,,", writer.toString().trim())

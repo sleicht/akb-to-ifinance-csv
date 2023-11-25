@@ -20,10 +20,12 @@ class CsvRecordConverter(
 	private val log = LoggerFactory.getLogger(javaClass)
 	private val writerCsvPreferences = CsvPreference.Builder('"', ','.code, System.lineSeparator()).build()
 	private val filterInput = """
-			Warenbezug und Dienstleistungen ([\w ]+) AKB Debit; AKB Debit;
-			TWINT-Zahlung ([\w ]+);(TWINT-Zahlung [\w ]+);;
-			" Zahlungseingang \/ Ref\.-Nr\. \d+ ([\w ]+) Referenz:"; Referenz: ;
-			" Belastung e-banking / Ref.-Nr. \d+ ([\w ]+) Mitteilung: "; Mitteilung: ;
+			Warenbezug und Dienstleistungen ([\S ]+) AKB Debit;(Warenbezug und Dienstleistungen [\S ]+) AKB Debit;
+			TWINT-Zahlung ([\S ]+),;(TWINT-Zahlung [\S ]+),;;
+			" Zahlungseingang \/ Ref\.-Nr\. \d+ ([\S ]+) Referenz:"; Referenz: ([\S ]+) ;
+			" Belastung e-banking / Ref.-Nr. \d+ ([\S ]+) Mitteilung: ";Mitteilung: ([\S ]+) ;
+			" Belastung e-banking \/ Ref.-Nr. \d+ ([\S ]+) Ursprünglicher"; (Belastung e-banking \/ Ref.-Nr. \d+ [\S ]+) Ursprünglicher;
+			" Übertrag von ([\S]+)";Ref.-Nr. \d+ ([\S ]+) ;
 			""".trimIndent()
 
 	fun convert() {

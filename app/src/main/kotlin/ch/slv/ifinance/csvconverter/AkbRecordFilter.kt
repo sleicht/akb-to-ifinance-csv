@@ -21,7 +21,11 @@ object AkbRecordFilterUtil {
 				.filter { it.beneficiaryRegex.containsMatchIn(string) }
 				.map {
 					val (beneficiary) = it.beneficiaryRegex.find(string)!!.destructured
-					val (description) = it.descriptionRegex.find(string)!!.destructured
+					var description: String? = null;
+					if (it.descriptionRegex.containsMatchIn(string)) {
+						val decDescription = it.descriptionRegex.find(string)!!.destructured.toList()
+						description = if (decDescription.isNotEmpty()) decDescription[0] else ""
+					}
 
 					AkbRecordFiltereData(beneficiary, description)
 				}
